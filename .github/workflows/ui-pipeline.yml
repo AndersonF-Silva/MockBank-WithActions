@@ -1,0 +1,41 @@
+name: Karate UI/UX Test Pipeline
+
+on:
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+  schedule:
+    # Executa todas as noites às 02:00 UTC (Regressão Agendada)
+    - cron: '0 2 * * *'
+
+jobs:
+  ui-tests:
+    name: Run Karate UI/UX Tests (Headless Chrome)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v4
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Verify Google Chrome Installation
+        run: google-chrome --version
+
+      - name: Run UI/UX Tests Suite
+        run: mvn test -Pui-tests
+
+      - name: Upload UI Test Reports & Screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: karate-ui-test-reports
+          path: |
+            target/karate-reports/
+            target/surefire-reports/
+          retention-days: 14
