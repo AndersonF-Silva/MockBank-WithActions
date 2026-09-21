@@ -1,4 +1,4 @@
-function() {
+function AuthService() {
   var service = {};
 
   // Função para autenticar e retornar o resultado completo da requisição

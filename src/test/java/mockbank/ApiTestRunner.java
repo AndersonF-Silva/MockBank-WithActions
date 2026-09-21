@@ -11,7 +11,7 @@ class ApiTestRunner {
     void testApiParallel() {
         Results results = Runner.path("classpath:mockbank/api")
                 .tags("@api", "~@ignore")
-                .parallel(5);
+                .parallel(1);
         assertEquals(0, results.getFailCount(), results.getErrorMessages());
     }
 }
