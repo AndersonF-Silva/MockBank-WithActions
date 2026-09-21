@@ -1,4 +1,4 @@
-@api
+@api @parallel=false
 Feature: API Authentication OAuth2
     Esta feature contém os testes de Backend voltados para a autenticação OAuth2 e validação de Tokens.
 
