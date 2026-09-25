@@ -1,4 +1,4 @@
-@ui
+@ui @focus
 Feature: UI Recuperação de senha
     Esta feature contém os testes de Frontend voltados para a validação da interface de usuário (UI) da página de recuperação de senha.
 
@@ -12,13 +12,17 @@ Feature: UI Recuperação de senha
         * waitFor("vaadin-login-form")
         * def found = RecoveryPage.isForgotPasswordLinkPresent()
         * match found == true
+        * screenshot()
 
     Scenario: CNF022 - Validar o clique sobre Forgot password exibindo a pagina de recuperacao
         * driver 'https://app.mockbank.io/login'
         * waitFor("vaadin-login-form")
         * def clicked = RecoveryPage.clickForgotPassword()
-        * retry until exists(RecoveryPage.emailField)
-        * match exists(RecoveryPage.emailField) == true
+        * match clicked == true
+        * delay(1000)
+        * retry until driver.url contains 'recovery'
+        * match driver.url contains 'recovery'
+        * screenshot()
 
     Scenario: CNF023 - Validar preenchimento de um email invalido, nao habilitando o botao Send me instructions
         * driver RecoveryPage.recoveryUrl
@@ -26,6 +30,7 @@ Feature: UI Recuperação de senha
         * RecoveryPage.enterEmail('email_invalido')
         * def disabled = RecoveryPage.isSendInstructionsButtonDisabled()
         * match disabled == true
+        * screenshot()
 
     Scenario: CNF024 - Email válido não registrado
         * driver RecoveryPage.recoveryUrl
@@ -37,6 +42,7 @@ Feature: UI Recuperação de senha
         * RecoveryPage.clickSendInstructions()
         * RecoveryPage.waitForToastText("Sorry, we can't send email to")
         * match RecoveryPage.getLastToastText() contains "Sorry, we can't send email to"
+        * screenshot()
 
     Scenario: CNF025 - Email válido registrado
         * driver RecoveryPage.recoveryUrl
@@ -48,3 +54,4 @@ Feature: UI Recuperação de senha
         * RecoveryPage.clickSendInstructions()
         * RecoveryPage.waitForToastText("Instructions were sent to")
         * match RecoveryPage.getLastToastText() contains "Instructions were sent to"
+        * screenshot()

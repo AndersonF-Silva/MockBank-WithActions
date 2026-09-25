@@ -9,18 +9,74 @@ function RecoveryPage() {
   var BUTTON_SELECTOR = "document.querySelector('vaadin-button')";
 
   // --- Navegação / link "Forgot password?" ---
+  // Busca recursiva atravessando shadow roots, mesmo padrão usado em login-page.js
+  function findElementById(root, id) {
+    root = root || document;
+    var el = root.querySelector('#' + id);
+    if (el) return el;
+    var all = Array.from(root.querySelectorAll('*'));
+    for (var i = 0; i < all.length; i++) {
+      if (all[i].shadowRoot) {
+        var found = findElementById(all[i].shadowRoot, id);
+        if (found) return found;
+      }
+    }
+    return null;
+  }
 
   page.isForgotPasswordLinkPresent = function() {
-    return exists(page.forgotPasswordLink);
+    var script = `
+      (() => {
+        function findById(root, id) {
+          root = root || document;
+          var el = root.querySelector('#' + id);
+          if (el) return el;
+          var all = Array.from(root.querySelectorAll('*'));
+          for (var i = 0; i < all.length; i++) {
+            if (all[i].shadowRoot) {
+              var found = findById(all[i].shadowRoot, id);
+              if (found) return found;
+            }
+          }
+          return null;
+        }
+        return !!findById(document, 'forgotPasswordButton');
+      })()
+    `;
+    return driver.script(script);
   };
 
+  page.forgotPasswordLink = "{^vaadin-button}Forgot password?";
+
   page.clickForgotPassword = function() {
-    click(page.forgotPasswordLink);
+    var pos = driver.script(`
+      (() => {
+        function findById(root, id) {
+          root = root || document;
+          var el = root.querySelector('#' + id);
+          if (el) return el;
+          var all = Array.from(root.querySelectorAll('*'));
+          for (var i = 0; i < all.length; i++) {
+            if (all[i].shadowRoot) {
+              var found = findById(all[i].shadowRoot, id);
+              if (found) return found;
+            }
+          }
+          return null;
+        }
+        var el = findById(document, 'forgotPasswordButton');
+        if (!el) return null;
+        var r = el.getBoundingClientRect();
+        return JSON.stringify({ x: r.x + r.width / 2, y: r.y + r.height / 2 });
+      })()
+    `);
+    if (!pos) return false;
+    var coords = JSON.parse(pos);
+    driver.mouse(coords.x, coords.y).click();
     return true;
   };
 
   // --- Preenchimento do campo de email ---
-
   page.enterEmail = function(email) {
     var emailJson = JSON.stringify(email);
     var script = `

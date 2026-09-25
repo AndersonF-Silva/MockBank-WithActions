@@ -2,10 +2,10 @@
 Feature: UI Login Page Verification
     Esta feature contém os testes de Frontend voltados para a validação da interface de usuário (UI) da página de login.
 
-Background:
-* driver uiUrl
-* waitFor("vaadin-login-form")
-* def LoginPage = call read('../pages/login-page.js')
+    Background:
+        * driver uiUrl
+        * waitFor('vaadin-login-form')
+        * def LoginPage = call read('../pages/login-page.js')
 
     Scenario: CNF014 - Validar exibicao do campo para preenchimento do Email
         * def found = LoginPage.isEmailFieldPresent()
@@ -36,7 +36,7 @@ Background:
         * LoginPage.enterEmail('invalid@mockbank.io')
         * LoginPage.enterPassword('wrongpassword')
         * LoginPage.clickLogin()
-        # Usa delay nativo do Karate (1000 ms)
+    # Usa delay nativo do Karate (1000 ms)
         * delay(1000)
         * LoginPage.waitForErrorMessage()
         * def errorText = LoginPage.getErrorMessageText()

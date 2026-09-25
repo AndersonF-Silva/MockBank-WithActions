@@ -3,6 +3,7 @@ Feature: UI Sign Up Page Verification
   Esta feature contém os testes de Frontend voltados para a validação da interface de usuário (UI) da página de sign up.
 
   Background:
+    * call read('../common/ui-common.feature')
     * configure afterScenario = function(){ if (karate.get('driver')) driver.screenshot() }
     * driver 'https://app.mockbank.io/signup'
     * waitFor('vaadin-form-layout')
@@ -71,35 +72,35 @@ Feature: UI Sign Up Page Verification
     * match found == true
 
   Scenario: CNF038 - Validar botao Sign up desabilitado quando termos nao aceitos
-    * SignUpPages.enterFirstName('John')
-    * SignUpPages.enterLastName('Doe')
-    * SignUpPages.enterCompanyName('Mock Company')
+    * SignUpPages.enterFirstName(validSignupUser.firstName)
+    * SignUpPages.enterLastName(validSignupUser.lastName)
+    * SignUpPages.enterCompanyName(validSignupUser.companyName)
     * SignUpPages.enterWorkEmail('john.doe@mockbank.io')
-    * SignUpPages.enterPassword('SenhaForte123!')
+    * SignUpPages.enterPassword(validSignupUser.password)
     * def enabled = SignUpPages.isSignUpButtonEnabled()
     * karate.log(enabled ? 'Falha! Botao habilitado sem aceite dos termos' : 'Sucesso! Botao desabilitado')
     * match enabled == false
 
   Scenario: CNF039 - Validar título da mensagem de erro para email já cadastrado
-    * SignUpPages.enterFirstName('John')
-    * SignUpPages.enterLastName('Doe')
-    * SignUpPages.enterCompanyName('Mock Company')
-    * SignUpPages.enterWorkEmail('anderson.silva@200dev.com')
-    * SignUpPages.enterPassword('AFS@s159!')
+    * SignUpPages.enterFirstName(validSignupUser.firstName)
+    * SignUpPages.enterLastName(validSignupUser.lastName)
+    * SignUpPages.enterCompanyName(validSignupUser.companyName)
+    * SignUpPages.enterWorkEmail(existingUser.email)
+    * SignUpPages.enterPassword(existingUser.password)
     * SignUpPages.acceptTerms()
     * SignUpPages.clickSignUp()
     # Usa delay nativo do Karate (1000 ms)
     * delay(1000)
     * SignUpPages.waitForErrorMessage()
     * def errorText = SignUpPages.getErrorMessageText()
-    * match errorText contains 'Email already used'
+    * match errorText contains messages.emailAlreadyUsed
 
   Scenario: CNF040 - Validar que o campo Work Email fica marcado como invalido apos erro de email já cadastrado
-    * SignUpPages.enterFirstName('John')
-    * SignUpPages.enterLastName('Doe')
-    * SignUpPages.enterCompanyName('Mock Company')
-    * SignUpPages.enterWorkEmail('anderson.silva@200dev.com')
-    * SignUpPages.enterPassword('AFS@s159!')
+    * SignUpPages.enterFirstName(validSignupUser.firstName)
+    * SignUpPages.enterLastName(validSignupUser.lastName)
+    * SignUpPages.enterCompanyName(validSignupUser.companyName)
+    * SignUpPages.enterWorkEmail(existingUser.email)
+    * SignUpPages.enterPassword(existingUser.password)
     * SignUpPages.acceptTerms()
     * SignUpPages.clickSignUp()
     * SignUpPages.waitForErrorMessage()
@@ -119,15 +120,15 @@ Feature: UI Sign Up Page Verification
     * def observedToast = SignUpPages.getObservedToastText()
     * karate.log('Toast capturado:', observedToast)
     # Valida mensagem
-    * match observedToast contains "Please enter valid data and try again"
+    * match observedToast contains messages.invalidDataToast
 
   Scenario: CNF042 - Validar abertura da página Terms and Conditions
     * def found = SignUpPages.isTermsAndConditionsLinkPresent()
     * karate.log(found ? 'Sucesso! Link Terms and Conditions presente' : 'Falha! Link ausente!')
     * match found == true
-    * driver.click("a[href='https://mockbank.io/terms-and-conditions']")
-    * driver.switchPage("https://mockbank.io/terms-and-conditions")
-    * match driver.url contains 'mockbank.io/terms-and-conditions'
+    * driver.click("a[href='" + urls.termsAndConditionsHref + "']")
+    * driver.switchPage(urls.termsAndConditionsPath)
+    * match driver.url contains urls.termsAndConditionsPath
 
   Scenario: CNF043 - Validar o clique sobre o botão Log in exibindo a página de Login
     * def found = SignUpPages.isLogInLinkPresent()
@@ -141,12 +142,12 @@ Feature: UI Sign Up Page Verification
 
   Scenario: CNF044 - Validar título da mensagem de Sucesso ao realizar cadastro
     * def uniqueSuffix = java.lang.System.currentTimeMillis()
-    * def email = 'anderson.silva+' + uniqueSuffix + '@200dev.com'
-    * SignUpPages.enterFirstName('Anderson F')
-    * SignUpPages.enterLastName('Silva')
-    * SignUpPages.enterCompanyName('Test Company')
+    * def email = testEmail.base + '+' + uniqueSuffix + '@' + testEmail.domain
+    * SignUpPages.enterFirstName(validSignupUser.firstName)
+    * SignUpPages.enterLastName(validSignupUser.lastName)
+    * SignUpPages.enterCompanyName(validSignupUser.companyName)
     * SignUpPages.enterWorkEmail(email)
-    * SignUpPages.enterPassword('SenhaForte123!X')
+    * SignUpPages.enterPassword(validSignupUser.password)
     * SignUpPages.acceptTerms()
     # Aguarda habilitação do botão
     * delay(2000)
@@ -163,19 +164,19 @@ Feature: UI Sign Up Page Verification
     * retry until SignUpPages.getSuccessMessageText() != ''
     * def successText = SignUpPages.getSuccessMessageText()
     * karate.log('Mensagem de sucesso capturada:', successText)
-    * match successText contains 'Thank you!'
+    * match successText contains messages.signupSuccessTitle
     * match successText contains 'We have sent you an Email with an activation link.'
     * match successText contains 'Please follow the link to activate your user account.'
     * match successText contains 'And here some documentation that can help you to get started.'
 
   Scenario: CNF045 - Validar abertura da página jrholding Working with Admin Console
     * def uniqueSuffix = java.lang.System.currentTimeMillis()
-    * def email = 'anderson.silva+' + uniqueSuffix + '@200dev.com'
-    * SignUpPages.enterFirstName('Anderson F')
-    * SignUpPages.enterLastName('Silva')
-    * SignUpPages.enterCompanyName('Test Company')
+    * def email = testEmail.base + '+' + uniqueSuffix + '@' + testEmail.domain
+    * SignUpPages.enterFirstName(validSignupUser.firstName)
+    * SignUpPages.enterLastName(validSignupUser.lastName)
+    * SignUpPages.enterCompanyName(validSignupUser.companyName)
     * SignUpPages.enterWorkEmail(email)
-    * SignUpPages.enterPassword('SenhaForte123!X')
+    * SignUpPages.enterPassword(validSignupUser.password)
     * SignUpPages.acceptTerms()
     # Aguarda habilitação do botão
     * delay(2000)
@@ -187,11 +188,11 @@ Feature: UI Sign Up Page Verification
     * delay(2000)
     * retry until driver.script("(function(){ \ return document.body && document.body.innerText.includes('Thank you!'); \ })()") == true
     # Localiza e clica no link "here"
-    * def linkClick = driver.script("(function(){ \ var link = document.querySelector('a[href*=\"jrholding.atlassian.net/wiki/spaces/MPD/pages/679149583\"]'); \ if(!link) return 'LINK NAO ENCONTRADO'; \ link.click(); \ return 'CLICK DISPARADO'; \ })()")
+    * def linkClick = driver.script("(function(){ \ var link = document.querySelector('a[href*=\"" + urls.adminConsoleDoc + "\"]'); \ if(!link) return 'LINK NAO ENCONTRADO'; \ link.click(); \ return 'CLICK DISPARADO'; \ })()")
     * karate.log('Resultado do clique no link:', linkClick)
     # Troca para a nova aba aberta
-    * driver.switchPage('https://jrholding.atlassian.net/wiki/spaces/MPD/pages/679149583/Working+with+Admin-Console')
+    * driver.switchPage(urls.adminConsoleDoc)
     # Valida a URL da nova aba
     * def currentUrl = driver.url
     * karate.log('URL atual após clique:', currentUrl)
-    * match currentUrl contains 'jrholding.atlassian.net/wiki/spaces/MPD/pages/679149583/Working+with+Admin-Console'
+    * match currentUrl contains urls.adminConsoleDoc
